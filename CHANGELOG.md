@@ -2,6 +2,11 @@
 
 Este proyecto sigue [Semantic Versioning](https://semver.org/lang/es/) y el formato de [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [0.1.1] - 2026-06-04
+### Fixed
+- El script de empaquetado ahora elimina `dist/MiniJuego2D` si existe antes de ejecutar `jpackage`.
+- El script falla correctamente cuando `mvn` o `jpackage` devuelven codigo distinto de cero.
+
 ## [0.1.0] - 2026-06-04
 ### Added
 - Juego 2D base en Swing con movimiento, colisiones, puntaje y reinicio.

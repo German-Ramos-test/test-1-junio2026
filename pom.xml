@@ -5,7 +5,7 @@
 
     <groupId>com.example</groupId>
     <artifactId>test-1-junio2026</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.1</version>
     <name>mini-juego-2d</name>
     <description>POC de videojuego 2D en Java Swing con pruebas y quality gates</description>
 
