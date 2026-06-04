@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GameEngine.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">mini-juego-2d</a> &gt; <a href="index.source.html" class="el_package">com.example</a> &gt; <span class="el_source">GameEngine.java</span></div><h1>GameEngine.java</h1><pre class="source lang-java linenums">package com.example;
+
+import java.awt.Rectangle;
+import java.util.Objects;
+import java.util.Random;
+
+final class GameEngine {
+    private final int width;
+    private final int height;
+    private final int playerSpeed;
+    private final int enemySize;
+    private final int enemyMinSpeed;
+    private final int enemyMaxSpeed;
+    private final int enemyHorizontalSpeed;
+    private final Random random;
+
+    private final Rectangle player;
+    private final Rectangle enemy;
+
+    private int enemySpeed;
+    private int score;
+    private boolean running;
+
+    GameEngine(
+            int width,
+            int height,
+            int playerSize,
+            int enemySize,
+            int playerSpeed,
+            int enemyMinSpeed,
+            int enemyMaxSpeed,
+            int enemyHorizontalSpeed,
+<span class="fc" id="L33">            Random random) {</span>
+<span class="fc" id="L34">        validateConstructorArguments(</span>
+                width,
+                height,
+                playerSize,
+                enemySize,
+                playerSpeed,
+                enemyMinSpeed,
+                enemyMaxSpeed,
+                enemyHorizontalSpeed,
+                random);
+
+<span class="fc" id="L45">        this.width = width;</span>
+<span class="fc" id="L46">        this.height = height;</span>
+<span class="fc" id="L47">        this.playerSpeed = playerSpeed;</span>
+<span class="fc" id="L48">        this.enemySize = enemySize;</span>
+<span class="fc" id="L49">        this.enemyMinSpeed = enemyMinSpeed;</span>
+<span class="fc" id="L50">        this.enemyMaxSpeed = enemyMaxSpeed;</span>
+<span class="fc" id="L51">        this.enemyHorizontalSpeed = enemyHorizontalSpeed;</span>
+<span class="fc" id="L52">        this.random = random;</span>
+
+<span class="fc" id="L54">        this.player = new Rectangle(80, height / 2 - playerSize / 2, playerSize, playerSize);</span>
+<span class="fc" id="L55">        this.enemy = new Rectangle(width - 120, 80, enemySize, enemySize);</span>
+<span class="fc" id="L56">        this.enemySpeed = enemyMinSpeed + random.nextInt(enemyMaxSpeed - enemyMinSpeed + 1);</span>
+<span class="fc" id="L57">        this.score = 0;</span>
+<span class="fc" id="L58">        this.running = true;</span>
+<span class="fc" id="L59">    }</span>
+
+    void tick(boolean leftPressed, boolean rightPressed, boolean upPressed, boolean downPressed) {
+<span class="fc bfc" id="L62" title="All 2 branches covered.">        if (!running) {</span>
+<span class="fc" id="L63">            return;</span>
+        }
+
+<span class="pc bpc" id="L66" title="1 of 2 branches missed.">        if (leftPressed) {</span>
+<span class="nc" id="L67">            player.x -= playerSpeed;</span>
+        }
+<span class="pc bpc" id="L69" title="1 of 2 branches missed.">        if (rightPressed) {</span>
+<span class="nc" id="L70">            player.x += playerSpeed;</span>
+        }
+<span class="pc bpc" id="L72" title="1 of 2 branches missed.">        if (upPressed) {</span>
+<span class="nc" id="L73">            player.y -= playerSpeed;</span>
+        }
+<span class="pc bpc" id="L75" title="1 of 2 branches missed.">        if (downPressed) {</span>
+<span class="nc" id="L76">            player.y += playerSpeed;</span>
+        }
+
+<span class="fc" id="L79">        GameLogic.clampPlayerToBounds(player, width, height);</span>
+
+<span class="fc" id="L81">        enemy.y += enemySpeed;</span>
+<span class="fc" id="L82">        enemySpeed = GameLogic.updateVerticalEnemySpeed(enemy.y, enemy.height, height, enemySpeed);</span>
+
+<span class="fc" id="L84">        enemy.x -= enemyHorizontalSpeed;</span>
+<span class="fc bfc" id="L85" title="All 2 branches covered.">        if (enemy.x + enemy.width &lt; 0) {</span>
+<span class="fc" id="L86">            score++;</span>
+<span class="fc" id="L87">            resetEnemyPosition();</span>
+        }
+
+<span class="fc bfc" id="L90" title="All 2 branches covered.">        if (GameLogic.hasCollision(player, enemy)) {</span>
+<span class="fc" id="L91">            running = false;</span>
+        }
+<span class="fc" id="L93">    }</span>
+
+    void resetGame() {
+<span class="nc" id="L96">        score = 0;</span>
+<span class="nc" id="L97">        running = true;</span>
+
+<span class="nc" id="L99">        player.x = 80;</span>
+<span class="nc" id="L100">        player.y = height / 2 - player.height / 2;</span>
+
+<span class="nc" id="L102">        enemy.x = width - 120;</span>
+<span class="nc" id="L103">        enemy.y = 80;</span>
+<span class="nc" id="L104">        enemySpeed = GameLogic.randomSignedSpeed(random, enemyMinSpeed, enemyMaxSpeed);</span>
+<span class="nc" id="L105">    }</span>
+
+    private void resetEnemyPosition() {
+<span class="fc" id="L108">        enemy.x = width + random.nextInt(220);</span>
+<span class="fc" id="L109">        enemy.y = random.nextInt(height - enemySize);</span>
+<span class="fc" id="L110">        enemySpeed = GameLogic.randomSignedSpeed(random, enemyMinSpeed, enemyMaxSpeed);</span>
+<span class="fc" id="L111">    }</span>
+
+    Rectangle getPlayer() {
+<span class="fc" id="L114">        return new Rectangle(player);</span>
+    }
+
+    Rectangle getEnemy() {
+<span class="fc" id="L118">        return new Rectangle(enemy);</span>
+    }
+
+    void setEnemyPosition(int x, int y) {
+<span class="fc" id="L122">        enemy.x = x;</span>
+<span class="fc" id="L123">        enemy.y = y;</span>
+<span class="fc" id="L124">    }</span>
+
+    int getScore() {
+<span class="fc" id="L127">        return score;</span>
+    }
+
+    boolean isRunning() {
+<span class="fc" id="L131">        return running;</span>
+    }
+
+    private static void validateConstructorArguments(
+            int width,
+            int height,
+            int playerSize,
+            int enemySize,
+            int playerSpeed,
+            int enemyMinSpeed,
+            int enemyMaxSpeed,
+            int enemyHorizontalSpeed,
+            Random random) {
+<span class="fc" id="L144">        Objects.requireNonNull(random, &quot;random no puede ser null&quot;);</span>
+
+<span class="pc bpc" id="L146" title="2 of 4 branches missed.">        if (width &lt;= 0 || height &lt;= 0) {</span>
+<span class="nc" id="L147">            throw new IllegalArgumentException(&quot;width y height deben ser mayores que cero&quot;);</span>
+        }
+<span class="pc bpc" id="L149" title="2 of 4 branches missed.">        if (playerSize &lt;= 0 || enemySize &lt;= 0) {</span>
+<span class="nc" id="L150">            throw new IllegalArgumentException(&quot;playerSize y enemySize deben ser mayores que cero&quot;);</span>
+        }
+<span class="pc bpc" id="L152" title="2 of 4 branches missed.">        if (playerSize &gt; width || playerSize &gt; height) {</span>
+<span class="nc" id="L153">            throw new IllegalArgumentException(&quot;playerSize no puede superar el tamano del panel&quot;);</span>
+        }
+<span class="pc bpc" id="L155" title="1 of 2 branches missed.">        if (enemySize &gt; height) {</span>
+<span class="nc" id="L156">            throw new IllegalArgumentException(&quot;enemySize no puede superar la altura del panel&quot;);</span>
+        }
+<span class="pc bpc" id="L158" title="2 of 4 branches missed.">        if (playerSpeed &lt;= 0 || enemyHorizontalSpeed &lt;= 0) {</span>
+<span class="nc" id="L159">            throw new IllegalArgumentException(&quot;playerSpeed y enemyHorizontalSpeed deben ser mayores que cero&quot;);</span>
+        }
+<span class="pc bpc" id="L161" title="1 of 4 branches missed.">        if (enemyMinSpeed &lt;= 0 || enemyMaxSpeed &lt; enemyMinSpeed) {</span>
+<span class="fc" id="L162">            throw new IllegalArgumentException(&quot;enemyMinSpeed y enemyMaxSpeed no son validos&quot;);</span>
+        }
+<span class="pc bpc" id="L164" title="1 of 2 branches missed.">        if (height &lt;= enemySize) {</span>
+<span class="nc" id="L165">            throw new IllegalArgumentException(&quot;height debe ser mayor que enemySize&quot;);</span>
+        }
+<span class="fc" id="L167">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

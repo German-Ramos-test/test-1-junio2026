@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GameLogic.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">mini-juego-2d</a> &gt; <a href="index.source.html" class="el_package">com.example</a> &gt; <span class="el_source">GameLogic.java</span></div><h1>GameLogic.java</h1><pre class="source lang-java linenums">package com.example;
+
+import java.awt.Rectangle;
+import java.util.Random;
+
+final class GameLogic {
+    private GameLogic() {
+    }
+
+    static void clampPlayerToBounds(Rectangle player, int width, int height) {
+<span class="fc bfc" id="L11" title="All 2 branches covered.">        if (player.x &lt; 0) {</span>
+<span class="fc" id="L12">            player.x = 0;</span>
+        }
+<span class="pc bpc" id="L14" title="1 of 2 branches missed.">        if (player.y &lt; 0) {</span>
+<span class="nc" id="L15">            player.y = 0;</span>
+        }
+<span class="pc bpc" id="L17" title="1 of 2 branches missed.">        if (player.x + player.width &gt; width) {</span>
+<span class="nc" id="L18">            player.x = width - player.width;</span>
+        }
+<span class="fc bfc" id="L20" title="All 2 branches covered.">        if (player.y + player.height &gt; height) {</span>
+<span class="fc" id="L21">            player.y = height - player.height;</span>
+        }
+<span class="fc" id="L23">    }</span>
+
+    static int updateVerticalEnemySpeed(int enemyY, int enemyHeight, int panelHeight, int currentSpeed) {
+<span class="fc bfc" id="L26" title="All 4 branches covered.">        if (enemyY &lt;= 0 || enemyY + enemyHeight &gt;= panelHeight) {</span>
+<span class="fc" id="L27">            return -currentSpeed;</span>
+        }
+<span class="fc" id="L29">        return currentSpeed;</span>
+    }
+
+    static int randomSignedSpeed(Random random, int minSpeed, int maxSpeed) {
+<span class="fc" id="L33">        int baseSpeed = minSpeed + random.nextInt(maxSpeed - minSpeed + 1);</span>
+<span class="fc bfc" id="L34" title="All 2 branches covered.">        return random.nextBoolean() ? baseSpeed : -baseSpeed;</span>
+    }
+
+    static boolean hasCollision(Rectangle player, Rectangle enemy) {
+<span class="fc" id="L38">        return player.intersects(enemy);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

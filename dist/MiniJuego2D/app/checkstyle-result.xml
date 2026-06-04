@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<checkstyle version="9.3">
+<file name="C:\Users\german.ramos\test-1-junio2026\src\main\java\com\example\App.java">
+</file>
+<file name="C:\Users\german.ramos\test-1-junio2026\src\main\java\com\example\GameEngine.java">
+</file>
+<file name="C:\Users\german.ramos\test-1-junio2026\src\main\java\com\example\GameLogic.java">
+</file>
+<file name="C:\Users\german.ramos\test-1-junio2026\src\test\java\com\example\AppTest.java">
+</file>
+<file name="C:\Users\german.ramos\test-1-junio2026\src\test\java\com\example\GameEngineIntegrationTest.java">
+</file>
+</checkstyle>
