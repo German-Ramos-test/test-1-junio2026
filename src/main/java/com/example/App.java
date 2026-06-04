@@ -45,13 +45,9 @@ public class App {
 
         private static final int TIMER_DELAY_MS = 16;
 
-        private final Rectangle player;
-        private final Rectangle enemy;
-        private final Random random;
+        private static final int ENEMY_HORIZONTAL_SPEED = 4;
 
-        private int enemySpeed;
-        private int score;
-        private boolean running;
+        private final GameEngine engine;
 
         private boolean leftPressed;
         private boolean rightPressed;
@@ -65,12 +61,16 @@ public class App {
             setBackground(new Color(18, 24, 40));
             setFocusable(true);
 
-            this.player = new Rectangle(80, HEIGHT / 2 - PLAYER_SIZE / 2, PLAYER_SIZE, PLAYER_SIZE);
-            this.enemy = new Rectangle(WIDTH - 120, 80, ENEMY_SIZE, ENEMY_SIZE);
-            this.random = new Random();
-            this.enemySpeed = ENEMY_MIN_SPEED + random.nextInt(ENEMY_MAX_SPEED - ENEMY_MIN_SPEED + 1);
-            this.score = 0;
-            this.running = true;
+                this.engine = new GameEngine(
+                    WIDTH,
+                    HEIGHT,
+                    PLAYER_SIZE,
+                    ENEMY_SIZE,
+                    PLAYER_SPEED,
+                    ENEMY_MIN_SPEED,
+                    ENEMY_MAX_SPEED,
+                    ENEMY_HORIZONTAL_SPEED,
+                    new Random());
 
             this.gameTimer = new Timer(TIMER_DELAY_MS, event -> {
                 updateGame();
@@ -99,8 +99,8 @@ public class App {
                             downPressed = true;
                             break;
                         case KeyEvent.VK_R:
-                            if (!running) {
-                                resetGame();
+                            if (!engine.isRunning()) {
+                                engine.resetGame();
                             }
                             break;
                         default:
@@ -135,80 +135,19 @@ public class App {
         }
 
         private void updateGame() {
-            if (!running) {
-                return;
-            }
-
-            if (leftPressed) {
-                player.x -= PLAYER_SPEED;
-            }
-            if (rightPressed) {
-                player.x += PLAYER_SPEED;
-            }
-            if (upPressed) {
-                player.y -= PLAYER_SPEED;
-            }
-            if (downPressed) {
-                player.y += PLAYER_SPEED;
-            }
-
-            clampPlayerToBounds();
-
-            enemy.y += enemySpeed;
-            if (enemy.y <= 0 || enemy.y + enemy.height >= HEIGHT) {
-                enemySpeed *= -1;
-            }
-
-            enemy.x -= 4;
-            if (enemy.x + enemy.width < 0) {
-                score++;
-                resetEnemyPosition();
-            }
-
-            if (player.intersects(enemy)) {
-                running = false;
+            boolean wasRunning = engine.isRunning();
+            engine.tick(leftPressed, rightPressed, upPressed, downPressed);
+            if (wasRunning && !engine.isRunning()) {
                 Toolkit.getDefaultToolkit().beep();
             }
-        }
-
-        private void clampPlayerToBounds() {
-            if (player.x < 0) {
-                player.x = 0;
-            }
-            if (player.y < 0) {
-                player.y = 0;
-            }
-            if (player.x + player.width > WIDTH) {
-                player.x = WIDTH - player.width;
-            }
-            if (player.y + player.height > HEIGHT) {
-                player.y = HEIGHT - player.height;
-            }
-        }
-
-        private void resetEnemyPosition() {
-            enemy.x = WIDTH + random.nextInt(220);
-            enemy.y = random.nextInt(HEIGHT - ENEMY_SIZE);
-
-            int speed = ENEMY_MIN_SPEED + random.nextInt(ENEMY_MAX_SPEED - ENEMY_MIN_SPEED + 1);
-            enemySpeed = random.nextBoolean() ? speed : -speed;
-        }
-
-        private void resetGame() {
-            score = 0;
-            running = true;
-
-            player.x = 80;
-            player.y = HEIGHT / 2 - PLAYER_SIZE / 2;
-
-            enemy.x = WIDTH - 120;
-            enemy.y = 80;
-            enemySpeed = ENEMY_MIN_SPEED + random.nextInt(ENEMY_MAX_SPEED - ENEMY_MIN_SPEED + 1);
         }
 
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
+
+            Rectangle player = engine.getPlayer();
+            Rectangle enemy = engine.getEnemy();
 
             g.setColor(new Color(40, 60, 94));
             for (int x = 0; x < WIDTH; x += 40) {
@@ -226,12 +165,12 @@ public class App {
 
             g.setColor(Color.WHITE);
             g.setFont(new Font("SansSerif", Font.BOLD, 22));
-            g.drawString("Puntos: " + score, 20, 35);
+            g.drawString("Puntos: " + engine.getScore(), 20, 35);
 
             g.setFont(new Font("SansSerif", Font.PLAIN, 16));
             g.drawString("Mover: WASD o flechas", 20, HEIGHT - 20);
 
-            if (!running) {
+            if (!engine.isRunning()) {
                 g.setFont(new Font("SansSerif", Font.BOLD, 42));
                 g.setColor(new Color(255, 225, 95));
                 String gameOverText = "GAME OVER";
