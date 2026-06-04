@@ -1,6 +1,7 @@
 package com.example;
 
 import java.awt.Rectangle;
+import java.util.Objects;
 import java.util.Random;
 
 final class GameEngine {
@@ -30,6 +31,17 @@ final class GameEngine {
             int enemyMaxSpeed,
             int enemyHorizontalSpeed,
             Random random) {
+        validateConstructorArguments(
+                width,
+                height,
+                playerSize,
+                enemySize,
+                playerSpeed,
+                enemyMinSpeed,
+                enemyMaxSpeed,
+                enemyHorizontalSpeed,
+                random);
+
         this.width = width;
         this.height = height;
         this.playerSpeed = playerSpeed;
@@ -89,7 +101,7 @@ final class GameEngine {
 
         enemy.x = width - 120;
         enemy.y = 80;
-        enemySpeed = enemyMinSpeed + random.nextInt(enemyMaxSpeed - enemyMinSpeed + 1);
+        enemySpeed = GameLogic.randomSignedSpeed(random, enemyMinSpeed, enemyMaxSpeed);
     }
 
     private void resetEnemyPosition() {
@@ -99,11 +111,16 @@ final class GameEngine {
     }
 
     Rectangle getPlayer() {
-        return player;
+        return new Rectangle(player);
     }
 
     Rectangle getEnemy() {
-        return enemy;
+        return new Rectangle(enemy);
+    }
+
+    void setEnemyPosition(int x, int y) {
+        enemy.x = x;
+        enemy.y = y;
     }
 
     int getScore() {
@@ -112,5 +129,40 @@ final class GameEngine {
 
     boolean isRunning() {
         return running;
+    }
+
+    private static void validateConstructorArguments(
+            int width,
+            int height,
+            int playerSize,
+            int enemySize,
+            int playerSpeed,
+            int enemyMinSpeed,
+            int enemyMaxSpeed,
+            int enemyHorizontalSpeed,
+            Random random) {
+        Objects.requireNonNull(random, "random no puede ser null");
+
+        if (width <= 0 || height <= 0) {
+            throw new IllegalArgumentException("width y height deben ser mayores que cero");
+        }
+        if (playerSize <= 0 || enemySize <= 0) {
+            throw new IllegalArgumentException("playerSize y enemySize deben ser mayores que cero");
+        }
+        if (playerSize > width || playerSize > height) {
+            throw new IllegalArgumentException("playerSize no puede superar el tamano del panel");
+        }
+        if (enemySize > height) {
+            throw new IllegalArgumentException("enemySize no puede superar la altura del panel");
+        }
+        if (playerSpeed <= 0 || enemyHorizontalSpeed <= 0) {
+            throw new IllegalArgumentException("playerSpeed y enemyHorizontalSpeed deben ser mayores que cero");
+        }
+        if (enemyMinSpeed <= 0 || enemyMaxSpeed < enemyMinSpeed) {
+            throw new IllegalArgumentException("enemyMinSpeed y enemyMaxSpeed no son validos");
+        }
+        if (height <= enemySize) {
+            throw new IllegalArgumentException("height debe ser mayor que enemySize");
+        }
     }
 }

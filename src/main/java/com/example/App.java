@@ -61,7 +61,7 @@ public class App {
             setBackground(new Color(18, 24, 40));
             setFocusable(true);
 
-                this.engine = new GameEngine(
+            this.engine = new GameEngine(
                     WIDTH,
                     HEIGHT,
                     PLAYER_SIZE,

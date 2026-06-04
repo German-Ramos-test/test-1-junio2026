@@ -28,8 +28,7 @@ class GameEngineIntegrationTest {
     void tick_whenEnemyLeavesScreen_addsPointAndRespawns() {
         GameEngine engine = createEngine();
         Rectangle enemy = engine.getEnemy();
-        enemy.x = -enemy.width;
-        enemy.y = 120;
+        engine.setEnemyPosition(-enemy.width, 120);
 
         engine.tick(false, false, false, false);
 
@@ -42,10 +41,8 @@ class GameEngineIntegrationTest {
     void tick_whenCollisionHappens_stopsGameAndNextTicksDoNotAdvance() {
         GameEngine engine = createEngine();
         Rectangle player = engine.getPlayer();
-        Rectangle enemy = engine.getEnemy();
 
-        enemy.x = player.x;
-        enemy.y = player.y;
+        engine.setEnemyPosition(player.x, player.y);
 
         engine.tick(false, false, false, false);
 
@@ -58,5 +55,15 @@ class GameEngineIntegrationTest {
 
         assertEquals(frozenX, player.x);
         assertEquals(frozenScore, engine.getScore());
+    }
+
+    @Test
+    void getPlayer_returnsDefensiveCopy() {
+        GameEngine engine = createEngine();
+
+        Rectangle snapshot = engine.getPlayer();
+        snapshot.x = 999;
+
+        assertEquals(80, engine.getPlayer().x);
     }
 }

@@ -2,6 +2,7 @@ package com.example;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.Rectangle;
@@ -50,5 +51,19 @@ class AppTest {
             int absolute = Math.abs(speed);
             assertTrue(absolute >= 3 && absolute <= 7);
         }
+    }
+
+    @Test
+    void gameEngine_constructorRejectsInvalidSpeedRange() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new GameEngine(800, 500, 36, 32, 6, 8, 7, 4, new Random(1)));
+    }
+
+    @Test
+    void gameEngine_constructorRejectsNullRandom() {
+        assertThrows(
+                NullPointerException.class,
+                () -> new GameEngine(800, 500, 36, 32, 6, 3, 7, 4, null));
     }
 }
