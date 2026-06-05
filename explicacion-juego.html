@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Explicacion interactiva del juego 2D</title>
+  <title>Mini Juego 2D en Java — Explicación Interactiva</title>
   <style>
     :root {
       --bg: #0f172a;
@@ -14,462 +14,1271 @@
       --ok: #22c55e;
       --warn: #f59e0b;
       --danger: #ef4444;
+      --info: #3b82f6;
       --line: #334155;
       --accent: #06b6d4;
+      --accent-dim: rgba(6,182,212,0.15);
     }
 
-    * { box-sizing: border-box; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      margin: 0;
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      background: radial-gradient(circle at 20% 10%, #172554, var(--bg) 45%);
+      background: radial-gradient(circle at 20% 10%, #172554, var(--bg) 55%);
       color: var(--text);
-      line-height: 1.5;
+      line-height: 1.6;
+      min-height: 100vh;
     }
 
     .wrap {
-      max-width: 1080px;
+      max-width: 1100px;
       margin: 0 auto;
-      padding: 20px;
+      padding: 24px 20px;
     }
 
+    /* ── HERO ─────────────────────────────────────────────────── */
     .hero {
       border: 1px solid var(--line);
-      background: linear-gradient(180deg, rgba(6, 182, 212, 0.14), rgba(17, 24, 39, 0.9));
-      border-radius: 16px;
-      padding: 18px;
-      margin-bottom: 16px;
+      background: linear-gradient(135deg, rgba(6,182,212,0.12), rgba(17,24,39,0.96));
+      border-radius: 20px;
+      padding: 28px 24px;
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
     }
-
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -40px; right: -40px;
+      width: 220px; height: 220px;
+      background: radial-gradient(circle, rgba(6,182,212,0.08), transparent 70%);
+      pointer-events: none;
+    }
+    .hero-badge {
+      display: inline-block;
+      background: rgba(6,182,212,0.18);
+      color: var(--accent);
+      border: 1px solid rgba(6,182,212,0.4);
+      border-radius: 999px;
+      padding: 3px 12px;
+      font-size: 0.77rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
     .hero h1 {
-      margin: 0 0 8px;
-      font-size: clamp(1.3rem, 2.5vw, 2rem);
+      font-size: clamp(1.4rem, 3vw, 2.2rem);
+      font-weight: 800;
+      margin-bottom: 8px;
+      line-height: 1.2;
     }
-
-    .hero p {
-      margin: 0;
-      color: var(--muted);
+    .hero h1 span { color: var(--accent); }
+    .hero > p { color: var(--muted); max-width: 680px; }
+    .hero-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
     }
+    .stat {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 7px 14px;
+      font-size: 0.82rem;
+    }
+    .stat strong { color: var(--accent); }
 
+    /* ── TABS ─────────────────────────────────────────────────── */
     .tabs {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       flex-wrap: wrap;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
     }
-
     .tab-btn {
       background: var(--panel);
-      color: var(--text);
+      color: var(--muted);
       border: 1px solid var(--line);
       border-radius: 999px;
-      padding: 8px 14px;
+      padding: 8px 16px;
       cursor: pointer;
-      transition: transform 120ms ease, border-color 120ms ease;
+      font-size: 0.9rem;
+      transition: all 140ms ease;
     }
-
-    .tab-btn:hover,
-    .tab-btn:focus-visible {
-      transform: translateY(-1px);
+    .tab-btn:hover, .tab-btn:focus-visible {
+      color: var(--text);
       border-color: var(--accent);
       outline: none;
     }
-
     .tab-btn.active {
       background: #0b3a44;
+      color: var(--accent);
       border-color: var(--accent);
     }
 
+    /* ── PANELS ───────────────────────────────────────────────── */
     .panel {
       display: none;
       border: 1px solid var(--line);
       background: var(--panel);
-      border-radius: 14px;
-      padding: 14px;
+      border-radius: 16px;
+      padding: 20px;
       margin-bottom: 14px;
-      animation: fade 180ms ease;
+      animation: fadeIn 200ms ease;
     }
-
     .panel.active { display: block; }
-
-    @keyframes fade {
-      from { opacity: 0; transform: translateY(2px); }
-      to { opacity: 1; transform: translateY(0); }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
 
+    h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--line);
+    }
+    h3 { font-size: 1rem; margin-bottom: 6px; }
+
+    /* ── DETAILS ──────────────────────────────────────────────── */
     details {
       border: 1px solid var(--line);
-      border-radius: 10px;
+      border-radius: 12px;
       background: var(--panel-2);
       margin-bottom: 10px;
       overflow: hidden;
+      transition: border-color 150ms ease;
     }
-
-    details[open] {
-      border-color: var(--accent);
-    }
-
+    details[open] { border-color: var(--accent); }
     summary {
       list-style: none;
       cursor: pointer;
-      padding: 10px 12px;
+      padding: 12px 14px;
       font-weight: 700;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      user-select: none;
     }
-
     summary::-webkit-details-marker { display: none; }
-
-    .content {
-      padding: 0 12px 12px;
+    summary .tag {
+      font-size: 0.74rem;
+      font-weight: 400;
       color: var(--muted);
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 2px 10px;
+      white-space: nowrap;
     }
+    .content {
+      padding: 4px 14px 14px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+    .content p { margin-bottom: 8px; }
+    .content ul, .content ol { padding-left: 20px; }
+    .content li { margin-bottom: 4px; line-height: 1.7; }
+    .content strong { color: var(--text); }
 
+    /* ── CODE ─────────────────────────────────────────────────── */
     .code {
-      margin-top: 8px;
+      margin-top: 10px;
       background: #020617;
       border: 1px solid var(--line);
       border-radius: 10px;
-      padding: 10px;
+      padding: 12px 14px;
       font-family: Consolas, "Courier New", monospace;
-      font-size: 0.88rem;
-      white-space: pre-wrap;
+      font-size: 0.84rem;
+      white-space: pre;
       color: #bae6fd;
+      overflow-x: auto;
     }
 
+    /* ── FLOW CARDS ───────────────────────────────────────────── */
     .flow {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
     }
-
     .card {
       border: 1px solid var(--line);
-      border-radius: 10px;
-      padding: 10px;
+      border-radius: 12px;
+      padding: 14px;
       background: var(--panel-2);
+      transition: border-color 140ms ease, transform 140ms ease;
     }
+    .card:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .card h3 { font-size: 1rem; margin: 6px 0 6px; }
+    .card p { font-size: 0.87rem; color: var(--muted); margin: 0; }
+    .card .filename { font-family: Consolas, monospace; font-size: 0.82rem; color: var(--accent); }
 
+    /* ── PILLS ────────────────────────────────────────────────── */
     .pill {
       display: inline-block;
-      padding: 2px 8px;
+      padding: 3px 10px;
       border-radius: 999px;
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: 700;
-      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
+    .ok     { background: rgba(34,197,94,0.15);  color: #86efac; }
+    .warn   { background: rgba(245,158,11,0.15); color: #fde68a; }
+    .danger { background: rgba(239,68,68,0.15);  color: #fca5a5; }
+    .info   { background: rgba(59,130,246,0.15); color: #93c5fd; }
+    .accent { background: rgba(6,182,212,0.15);  color: #67e8f9; }
 
-    .ok { background: rgba(34, 197, 94, 0.2); color: #86efac; }
-    .warn { background: rgba(245, 158, 11, 0.2); color: #fde68a; }
-    .danger { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+    /* ── TABLE ────────────────────────────────────────────────── */
+    table { width: 100%; border-collapse: collapse; font-size: 0.87rem; margin-top: 12px; }
+    th {
+      text-align: left;
+      padding: 8px 12px;
+      background: var(--panel-2);
+      border-bottom: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    td {
+      padding: 8px 12px;
+      border-bottom: 1px solid rgba(51,65,85,0.5);
+      color: var(--muted);
+    }
+    td:first-child { font-family: Consolas, monospace; color: var(--accent); }
+    tr:hover td { background: rgba(255,255,255,0.02); }
 
-    .sim {
+    /* ── ARCH DIAGRAM ─────────────────────────────────────────── */
+    .arch-diagram {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin: 16px 0 20px;
+      padding: 20px;
+      background: var(--panel-2);
+      border-radius: 12px;
+      border: 1px solid var(--line);
+    }
+    .arch-node { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .arch-box {
+      padding: 10px 18px;
+      border-radius: 10px;
+      border: 1px solid;
+      text-align: center;
+      font-size: 0.84rem;
+      font-weight: 700;
+      min-width: 130px;
+    }
+    .arch-box.ui     { border-color: #22c55e; background: rgba(34,197,94,0.08);  color: #86efac; }
+    .arch-box.engine { border-color: #f59e0b; background: rgba(245,158,11,0.08); color: #fde68a; }
+    .arch-box.logic  { border-color: #06b6d4; background: rgba(6,182,212,0.08);  color: #67e8f9; }
+    .arch-box.test   { border-color: #ef4444; background: rgba(239,68,68,0.08);  color: #fca5a5; }
+    .arch-label { font-size: 0.72rem; color: var(--muted); }
+    .arch-arrow { font-size: 1.5rem; color: var(--line); padding: 0 4px; user-select: none; }
+
+    /* ── PRINCIPLES ───────────────────────────────────────────── */
+    .principle-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 10px;
+      margin: 12px 0;
+    }
+    .principle-card {
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 14px;
+    }
+    .principle-card .icon { font-size: 1.5rem; margin-bottom: 8px; }
+    .principle-card h4 { font-size: 0.88rem; margin-bottom: 4px; color: var(--text); }
+    .principle-card p  { font-size: 0.82rem; color: var(--muted); margin: 0; }
+
+    /* ── STEP LIST ────────────────────────────────────────────── */
+    .step-list { counter-reset: steps; list-style: none; padding: 0; }
+    .step-list li {
+      counter-increment: steps;
+      display: flex;
+      gap: 14px;
+      margin-bottom: 18px;
+      align-items: flex-start;
+    }
+    .step-list li::before {
+      content: counter(steps);
+      flex-shrink: 0;
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      background: var(--accent-dim);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 0.84rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 2px;
+    }
+    .step-body strong { display: block; margin-bottom: 3px; color: var(--text); }
+    .step-body p { color: var(--muted); font-size: 0.9rem; margin: 0; }
+
+    /* ── SIMULATOR ────────────────────────────────────────────── */
+    .sim-wrap {
+      display: grid;
+      grid-template-columns: 1fr 190px;
+      gap: 16px;
+      align-items: start;
+    }
+    @media (max-width: 700px) { .sim-wrap { grid-template-columns: 1fr; } }
+    .sim-canvas-wrap {
       border: 1px solid var(--line);
       border-radius: 12px;
+      overflow: hidden;
       background: #020617;
-      padding: 12px;
     }
-
-    .row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin: 8px 0;
-      align-items: center;
+    canvas { display: block; width: 100%; height: auto; }
+    .sim-controls { display: flex; flex-direction: column; gap: 8px; }
+    .sim-section-title {
+      font-size: 0.74rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 2px;
     }
-
+    .kv {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin-top: 12px;
+    }
+    .kv div {
+      background: #0b1220;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 10px;
+    }
+    .kv strong {
+      display: block;
+      color: var(--text);
+      font-size: 0.76rem;
+      margin-bottom: 2px;
+      font-family: Consolas, monospace;
+    }
+    .kv span { color: var(--accent); font-size: 0.88rem; font-family: Consolas, monospace; }
     button.action {
       background: #0b3a44;
       color: #e0f2fe;
       border: 1px solid #155e75;
       border-radius: 8px;
-      padding: 7px 10px;
+      padding: 8px 12px;
       cursor: pointer;
+      font-size: 0.86rem;
+      transition: all 120ms ease;
+      width: 100%;
+      text-align: left;
     }
+    button.action:hover, button.action:focus-visible { border-color: var(--accent); background: #0e4a5a; outline: none; }
+    button.action.pressed { background: #0e4a5a; border-color: var(--ok); color: #86efac; }
 
-    button.action:hover,
-    button.action:focus-visible {
-      border-color: var(--accent);
-      outline: none;
+    /* ── TEST CASE ────────────────────────────────────────────── */
+    .test-case {
+      border-left: 3px solid var(--accent);
+      padding-left: 12px;
+      margin-bottom: 16px;
     }
+    .test-case .test-name {
+      font-family: Consolas, monospace;
+      font-size: 0.83rem;
+      color: #fde68a;
+      margin-bottom: 4px;
+    }
+    .test-case p { color: var(--muted); font-size: 0.9rem; margin: 0 0 6px; }
 
-    .kv {
+    /* ── CONTROLS GRID ────────────────────────────────────────── */
+    .controls-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
       gap: 8px;
-      margin-top: 8px;
+      margin: 12px 0;
     }
-
-    .kv div {
-      background: #0b1220;
+    .ctrl-card {
+      background: var(--panel-2);
       border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 8px;
-      color: var(--muted);
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
     }
-
-    .kv strong {
-      display: block;
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #020617;
+      border: 1px solid var(--line);
+      border-bottom: 3px solid var(--line);
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-family: Consolas, monospace;
+      font-size: 0.84rem;
       color: var(--text);
-      margin-bottom: 3px;
-      font-size: 0.88rem;
+      min-width: 44px;
+      flex-shrink: 0;
     }
+    .ctrl-desc { font-size: 0.87rem; color: var(--muted); }
 
+    /* ── FOOTER ───────────────────────────────────────────────── */
     footer {
       color: var(--muted);
-      font-size: 0.86rem;
-      margin-top: 12px;
+      font-size: 0.85rem;
+      margin-top: 16px;
       border-top: 1px solid var(--line);
-      padding-top: 10px;
+      padding-top: 14px;
+      line-height: 1.8;
+    }
+    footer strong { color: var(--text); }
+
+    code {
+      font-family: Consolas, monospace;
+      font-size: 0.88em;
+      background: rgba(6,182,212,0.1);
+      color: #67e8f9;
+      padding: 1px 5px;
+      border-radius: 4px;
     }
   </style>
 </head>
 <body>
   <div class="wrap">
+
+    <!-- ─── HERO ─────────────────────────────────────────────── -->
     <section class="hero">
-      <h1>Explicacion interactiva: mini juego 2D en Java</h1>
-      <p>Esta guia recorre el codigo en orden de ejecucion: UI, motor de juego, logica y tests.</p>
+      <div class="hero-badge">Documentación técnica interactiva</div>
+      <h1>Mini Juego 2D en Java: <span>Esquiva Cuadrados</span></h1>
+      <p>Guía completa sobre la arquitectura, el flujo de ejecución, cada clase y método, el ciclo de renderizado, los tests y cómo ampliar el juego.</p>
+      <div class="hero-stats">
+        <div class="stat"><strong>800 × 500 px</strong> · lienzo</div>
+        <div class="stat"><strong>~62 FPS</strong> · Timer cada 16 ms</div>
+        <div class="stat"><strong>3 clases</strong> · App, Engine, Logic</div>
+        <div class="stat"><strong>10 tests</strong> · Unit + Integración</div>
+        <div class="stat"><strong>Java + Swing</strong> · JUnit 5</div>
+        <div class="stat"><strong>WASD / flechas</strong> · controles</div>
+      </div>
     </section>
 
+    <!-- ─── TABS ──────────────────────────────────────────────── -->
     <nav class="tabs" aria-label="Secciones">
-      <button class="tab-btn active" data-tab="arquitectura">Arquitectura</button>
-      <button class="tab-btn" data-tab="paso">Paso a paso</button>
-      <button class="tab-btn" data-tab="simulador">Simulador de frame</button>
-      <button class="tab-btn" data-tab="tests">Tests</button>
+      <button class="tab-btn active" data-tab="arquitectura">🏗 Arquitectura</button>
+      <button class="tab-btn" data-tab="clases">🔍 Clases y métodos</button>
+      <button class="tab-btn" data-tab="flujo">⚡ Flujo de ejecución</button>
+      <button class="tab-btn" data-tab="simulador">🎮 Simulador</button>
+      <button class="tab-btn" data-tab="tests">🧪 Tests</button>
+      <button class="tab-btn" data-tab="guia">🛠 Guía práctica</button>
     </nav>
 
+    <!-- ─── TAB: ARQUITECTURA ─────────────────────────────────── -->
     <section id="arquitectura" class="panel active">
-      <h2>1) Arquitectura del proyecto</h2>
+      <h2>Arquitectura del proyecto</h2>
+
       <div class="flow">
         <article class="card">
-          <span class="pill ok">UI</span>
-          <h3>App.java</h3>
-          <p>Crea la ventana Swing, captura teclado y pinta en pantalla.</p>
+          <span class="pill ok">UI + entrada</span>
+          <h3><span class="filename">App.java</span></h3>
+          <p>Punto de entrada. Crea el <code>JFrame</code>, instancia <code>GamePanel</code>, captura eventos de teclado y ejecuta el bucle de pintado mediante un <code>Timer</code> de Swing.</p>
         </article>
         <article class="card">
-          <span class="pill warn">Motor</span>
-          <h3>GameEngine.java</h3>
-          <p>Actualiza estado por frame: movimiento, colisiones, puntos y reset.</p>
+          <span class="pill warn">Estado + motor</span>
+          <h3><span class="filename">GameEngine.java</span></h3>
+          <p>Almacena todo el estado mutable: posiciones de jugador y enemigo, velocidades, puntuación y el flag <code>running</code>. Expone <code>tick()</code> y <code>resetGame()</code>.</p>
         </article>
         <article class="card">
-          <span class="pill ok">Reglas puras</span>
-          <h3>GameLogic.java</h3>
-          <p>Funciones sin UI para limites, rebotes, colision y velocidad aleatoria.</p>
+          <span class="pill accent">Reglas puras</span>
+          <h3><span class="filename">GameLogic.java</span></h3>
+          <p>Clase <code>final</code> sin estado con funciones <code>static</code> deterministas: límites del jugador, rebote del enemigo, detección de colisión y velocidad aleatoria con signo.</p>
         </article>
         <article class="card">
           <span class="pill danger">Calidad</span>
-          <h3>Tests</h3>
-          <p>Unit tests para reglas e integration tests para ciclo completo de juego.</p>
+          <h3><span class="filename">Tests</span></h3>
+          <p>6 tests unitarios en <code>AppTest</code> sobre <code>GameLogic</code> y el constructor de <code>GameEngine</code>. 4 tests de integración en <code>GameEngineIntegrationTest</code> para el ciclo completo.</p>
         </article>
       </div>
-    </section>
 
-    <section id="paso" class="panel">
-      <h2>2) Paso a paso del flujo</h2>
-
-      <details open>
-        <summary>Arranque de la app <span>main -> ventana</span></summary>
-        <div class="content">
-          App.main ejecuta SwingUtilities.invokeLater, crea JFrame, agrega GamePanel y muestra la ventana.
-          <div class="code">SwingUtilities.invokeLater(() -> {
-  JFrame frame = new JFrame("Mini Juego 2D - Esquiva Cuadrados");
-  frame.setContentPane(new GamePanel());
-  frame.pack();
-  frame.setVisible(true);
-});</div>
+      <h3 style="margin-bottom:10px;">Diagrama de dependencias</h3>
+      <div class="arch-diagram">
+        <div class="arch-node">
+          <div class="arch-box test">AppTest<br><span style="font-weight:400;font-size:0.74rem;">GameEngineIntegrationTest</span></div>
+          <span class="arch-label">Tests (JUnit 5)</span>
         </div>
-      </details>
-
-      <details>
-        <summary>Bucle de juego <span>Timer cada ~16ms</span></summary>
-        <div class="content">
-          El Timer llama updateGame() y repaint() en cada tick. Eso produce ~60 FPS.
-          <div class="code">this.gameTimer = new Timer(16, event -> {
-  updateGame();
-  repaint();
-});</div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-node">
+          <div class="arch-box ui">App.java<br><span style="font-weight:400;font-size:0.74rem;">GamePanel (inner class)</span></div>
+          <span class="arch-label">UI / Entrada de teclado</span>
         </div>
-      </details>
-
-      <details>
-        <summary>Actualizacion de estado <span>GameEngine.tick</span></summary>
-        <div class="content">
-          Tick aplica teclado, limita al jugador, mueve enemigo, suma puntos si sale de pantalla y verifica colision.
-          <div class="code">engine.tick(leftPressed, rightPressed, upPressed, downPressed);</div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-node">
+          <div class="arch-box engine">GameEngine.java</div>
+          <span class="arch-label">Motor / Estado mutable</span>
         </div>
-      </details>
-
-      <details>
-        <summary>Renderizado <span>paintComponent</span></summary>
-        <div class="content">
-          Dibuja fondo, jugador, enemigo, HUD de puntos y cartel de game over cuando running = false.
+        <div class="arch-arrow">→</div>
+        <div class="arch-node">
+          <div class="arch-box logic">GameLogic.java</div>
+          <span class="arch-label">Reglas puras / sin estado</span>
         </div>
-      </details>
+      </div>
 
-      <details>
-        <summary>Reinicio <span>tecla R</span></summary>
-        <div class="content">
-          Si el juego termino, al pulsar R se restaura score, posiciones y estado running.
-        </div>
-      </details>
-    </section>
+      <h3 style="margin-bottom:4px;">Constantes de configuración</h3>
+      <p style="color:var(--muted);font-size:0.87rem;margin-bottom:0;">Definidas como <code>private static final</code> en <code>GamePanel</code> e inyectadas al constructor de <code>GameEngine</code>.</p>
+      <table>
+        <thead><tr><th>Constante</th><th>Valor</th><th>Descripción</th></tr></thead>
+        <tbody>
+          <tr><td>WIDTH</td><td>800 px</td><td>Ancho del lienzo de juego</td></tr>
+          <tr><td>HEIGHT</td><td>500 px</td><td>Alto del lienzo de juego</td></tr>
+          <tr><td>PLAYER_SIZE</td><td>36 px</td><td>Lado del cuadrado jugador (verde)</td></tr>
+          <tr><td>PLAYER_SPEED</td><td>6 px/frame</td><td>Desplazamiento del jugador por tick</td></tr>
+          <tr><td>ENEMY_SIZE</td><td>32 px</td><td>Lado del cuadrado enemigo (rojo)</td></tr>
+          <tr><td>ENEMY_MIN_SPEED</td><td>3 px/frame</td><td>Velocidad vertical mínima del enemigo</td></tr>
+          <tr><td>ENEMY_MAX_SPEED</td><td>7 px/frame</td><td>Velocidad vertical máxima del enemigo</td></tr>
+          <tr><td>ENEMY_HORIZONTAL_SPEED</td><td>4 px/frame</td><td>Velocidad con la que el enemigo avanza hacia la izquierda</td></tr>
+          <tr><td>TIMER_DELAY_MS</td><td>16 ms</td><td>Intervalo del Swing Timer (≈ 62,5 FPS)</td></tr>
+        </tbody>
+      </table>
 
-    <section id="simulador" class="panel">
-      <h2>3) Simulador didactico de frame</h2>
-      <p>Este simulador no usa Java real: imita el flujo para entender como cambia el estado en cada tick.</p>
-      <div class="sim">
-        <div class="row">
-          <button class="action" id="btnFrame">Ejecutar 1 frame</button>
-          <button class="action" id="btnLeft">Mover izquierda (toggle)</button>
-          <button class="action" id="btnRight">Mover derecha (toggle)</button>
-          <button class="action" id="btnReset">Reset estado</button>
+      <h3 style="margin:20px 0 10px;">Principios de diseño aplicados</h3>
+      <div class="principle-grid">
+        <div class="principle-card">
+          <div class="icon">🔀</div>
+          <h4>Separación de responsabilidades</h4>
+          <p>UI, estado y reglas están en clases distintas. Cambiar el renderizador no toca la lógica de juego.</p>
         </div>
-        <div class="kv">
-          <div><strong>player.x</strong><span id="sx"></span></div>
-          <div><strong>enemy.x</strong><span id="ex"></span></div>
-          <div><strong>enemy.y</strong><span id="ey"></span></div>
-          <div><strong>enemySpeed</strong><span id="ev"></span></div>
-          <div><strong>score</strong><span id="sc"></span></div>
-          <div><strong>running</strong><span id="rn"></span></div>
-          <div><strong>leftPressed</strong><span id="lp"></span></div>
-          <div><strong>rightPressed</strong><span id="rp"></span></div>
+        <div class="principle-card">
+          <div class="icon">💉</div>
+          <h4>Inyección de dependencias</h4>
+          <p><code>Random</code> y todos los parámetros numéricos se inyectan al constructor de <code>GameEngine</code>, lo que permite tests con semillas fijas y resultados reproducibles.</p>
+        </div>
+        <div class="principle-card">
+          <div class="icon">🔒</div>
+          <h4>Copias defensivas</h4>
+          <p><code>getPlayer()</code> y <code>getEnemy()</code> devuelven <code>new Rectangle(original)</code>, protegiendo el estado interno del motor frente a modificaciones externas.</p>
+        </div>
+        <div class="principle-card">
+          <div class="icon">✅</div>
+          <h4>Funciones puras y testables</h4>
+          <p><code>GameLogic</code> no tiene campos de instancia; solo recibe datos y devuelve resultados. Cero efectos secundarios y cobertura de test máxima.</p>
         </div>
       </div>
     </section>
 
-    <section id="tests" class="panel">
-      <h2>4) Como leer los tests</h2>
+    <!-- ─── TAB: CLASES Y MÉTODOS ──────────────────────────────── -->
+    <section id="clases" class="panel">
+      <h2>Clases y métodos en detalle</h2>
+
       <details open>
-        <summary>Unit tests (GameLogic)</summary>
+        <summary>App.java — Punto de entrada y ventana Swing <span class="tag">UI</span></summary>
         <div class="content">
-          Verifican funciones puras: limites, rebote, colision, rango de velocidad.
+          <p><code>App</code> contiene el método <code>main</code> y la clase interna privada <code>GamePanel</code> que extiende <code>JPanel</code>. Toda la lógica de presentación vive aquí.</p>
+
+          <strong>main(String[] args)</strong>
+          <p>Envuelve la construcción de la UI en <code>SwingUtilities.invokeLater</code> para garantizar que se ejecute en el Event Dispatch Thread (EDT) de Swing, evitando condiciones de carrera.</p>
+          <div class="code">SwingUtilities.invokeLater(() -> {
+    JFrame frame = new JFrame("Mini Juego 2D - Esquiva Cuadrados");
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    frame.setResizable(false);
+    GamePanel gamePanel = new GamePanel();
+    frame.setContentPane(gamePanel);
+    frame.pack();                         // ajusta al preferredSize (800x500)
+    frame.setLocationRelativeTo(null);    // centra la ventana en pantalla
+    frame.setVisible(true);
+    gamePanel.requestFocusInWindow();     // imprescindible para recibir teclas
+});</div>
+
+          <strong>GamePanel() — Constructor</strong>
+          <p>Configura el panel, crea el <code>GameEngine</code> con todas las constantes, arranca el <code>Timer</code> a 16 ms e instala un <code>KeyAdapter</code> para captura continua de teclas.</p>
+          <div class="code">setPreferredSize(new Dimension(WIDTH, HEIGHT));  // 800x500 px
+setBackground(new Color(18, 24, 40));
+setFocusable(true);
+
+this.engine = new GameEngine(
+    WIDTH, HEIGHT, PLAYER_SIZE, ENEMY_SIZE,
+    PLAYER_SPEED, ENEMY_MIN_SPEED, ENEMY_MAX_SPEED,
+    ENEMY_HORIZONTAL_SPEED, new Random());
+
+this.gameTimer = new Timer(16, event -> {
+    updateGame();   // avanza el estado un tick
+    repaint();      // solicita redibujado al EDT
+});
+this.gameTimer.start();</div>
+
+          <strong>updateGame()</strong>
+          <p>Delega el avance del estado a <code>engine.tick()</code>. Detecta la transición <em>running → false</em> para hacer sonar el pitido del sistema en el momento exacto del game over.</p>
+          <div class="code">private void updateGame() {
+    boolean wasRunning = engine.isRunning();
+    engine.tick(leftPressed, rightPressed, upPressed, downPressed);
+    if (wasRunning && !engine.isRunning()) {
+        Toolkit.getDefaultToolkit().beep();  // pitido de sistema al morir
+    }
+}</div>
+
+          <strong>paintComponent(Graphics g)</strong>
+          <p>Llamado automáticamente por Swing en cada <code>repaint()</code>. Orden de capas (painter's algorithm):</p>
+          <ol>
+            <li><code>super.paintComponent(g)</code> — limpia el fondo con <code>#12182A</code></li>
+            <li>Rejilla decorativa: líneas cada 40 px en azul oscuro <code>#28405E</code></li>
+            <li>Jugador: <code>fillRect</code> verde <code>#50DC82</code> en la posición de <code>engine.getPlayer()</code></li>
+            <li>Enemigo: <code>fillRect</code> rojo <code>#FF5F56</code> en la posición de <code>engine.getEnemy()</code></li>
+            <li>HUD: "Puntos: N" en fuente BOLD 22 px, esquina superior izquierda</li>
+            <li>Instrucciones: "Mover: WASD o flechas" en la parte inferior</li>
+            <li>Overlay "GAME OVER" centrado en amarillo (solo si <code>!engine.isRunning()</code>)</li>
+          </ol>
+
+          <strong>KeyAdapter — teclas reconocidas</strong>
+          <ul>
+            <li><kbd>←</kbd> / <kbd>A</kbd> → activa/desactiva <code>leftPressed</code></li>
+            <li><kbd>→</kbd> / <kbd>D</kbd> → activa/desactiva <code>rightPressed</code></li>
+            <li><kbd>↑</kbd> / <kbd>W</kbd> → activa/desactiva <code>upPressed</code></li>
+            <li><kbd>↓</kbd> / <kbd>S</kbd> → activa/desactiva <code>downPressed</code></li>
+            <li><kbd>R</kbd> → llama a <code>engine.resetGame()</code> solo si <code>!isRunning()</code></li>
+          </ul>
+          <p style="margin-top:8px;">El uso de flags booleanos separados en <code>keyPressed</code> / <code>keyReleased</code> permite movimiento diagonal suave (dos teclas a la vez).</p>
         </div>
       </details>
+
       <details>
-        <summary>Integration tests (GameEngine)</summary>
+        <summary>GameEngine.java — Motor y estado mutable del juego <span class="tag">Motor</span></summary>
         <div class="content">
-          Verifican el flujo de varios pasos: movimiento por frame, suma de puntos al salir y stop al colisionar.
+          <p>Clase <code>final</code> de ámbito de paquete (sin <code>public</code>). No tiene ninguna referencia a Swing, por lo que es perfectamente testable sin entorno gráfico.</p>
+
+          <strong>Constructor — validación exhaustiva</strong>
+          <p>Antes de asignar cualquier campo, valida todos los parámetros. Lanza <code>NullPointerException</code> si <code>random</code> es <code>null</code>, e <code>IllegalArgumentException</code> para dimensiones ≤ 0, tamaños ≤ 0, velocidad ≤ 0 o rango inválido (<code>minSpeed &gt; maxSpeed</code>).</p>
+          <div class="code">this.player = new Rectangle(80, height / 2 - playerSize / 2, playerSize, playerSize);
+this.enemy  = new Rectangle(width - 120, 80, enemySize, enemySize);
+this.enemySpeed = enemyMinSpeed + random.nextInt(enemyMaxSpeed - enemyMinSpeed + 1);</div>
+
+          <strong>tick(left, right, up, down) — corazón del motor</strong>
+          <p>Se ejecuta aproximadamente 62 veces por segundo. Orden de operaciones dentro de un tick:</p>
+          <ol>
+            <li>Si <code>!running</code>, retorna inmediatamente (estado completamente congelado).</li>
+            <li>Aplica las teclas pulsadas: <code>player.x ±= playerSpeed</code>, <code>player.y ±= playerSpeed</code>.</li>
+            <li>Llama a <code>GameLogic.clampPlayerToBounds</code> para mantener al jugador dentro del lienzo.</li>
+            <li>Mueve el enemigo verticalmente: <code>enemy.y += enemySpeed</code>.</li>
+            <li>Invierte <code>enemySpeed</code> si el enemigo toca el borde superior (y ≤ 0) o inferior (y+h ≥ H).</li>
+            <li>Mueve el enemigo horizontalmente: <code>enemy.x -= enemyHorizontalSpeed</code> (siempre hacia la izquierda).</li>
+            <li>Si el enemigo sale por la izquierda: incrementa <code>score</code> y llama a <code>resetEnemyPosition()</code>.</li>
+            <li>Verifica colisión con <code>GameLogic.hasCollision(player, enemy)</code>; si hay solapamiento, <code>running = false</code>.</li>
+          </ol>
+          <div class="code">void tick(boolean left, boolean right, boolean up, boolean down) {
+    if (!running) return;
+    if (left)  player.x -= playerSpeed;
+    if (right) player.x += playerSpeed;
+    if (up)    player.y -= playerSpeed;
+    if (down)  player.y += playerSpeed;
+    GameLogic.clampPlayerToBounds(player, width, height);
+    enemy.y += enemySpeed;
+    enemySpeed = GameLogic.updateVerticalEnemySpeed(
+        enemy.y, enemy.height, height, enemySpeed);
+    enemy.x -= enemyHorizontalSpeed;
+    if (enemy.x + enemy.width &lt; 0) { score++; resetEnemyPosition(); }
+    if (GameLogic.hasCollision(player, enemy)) running = false;
+}</div>
+
+          <strong>resetGame()</strong>
+          <p>Restaura completamente el estado inicial: score=0, running=true, jugador centrado verticalmente a x=80, enemigo en x=width−120, y=80 y velocidad vertical aleatoria con signo.</p>
+          <div class="code">void resetGame() {
+    score = 0;
+    running = true;
+    player.x = 80;
+    player.y = height / 2 - player.height / 2;
+    enemy.x  = width - 120;
+    enemy.y  = 80;
+    enemySpeed = GameLogic.randomSignedSpeed(random, enemyMinSpeed, enemyMaxSpeed);
+}</div>
+
+          <strong>resetEnemyPosition() — reaparición del enemigo</strong>
+          <p>Se llama cuando el enemigo cruza el borde izquierdo. La nueva posición es aleatoria: x entre 800 y 1020, y entre 0 y (H − enemySize), con velocidad aleatoria con signo.</p>
+          <div class="code">enemy.x = width + random.nextInt(220);          // 800–1020
+enemy.y = random.nextInt(height - enemySize);   // 0–468
+enemySpeed = GameLogic.randomSignedSpeed(random, enemyMinSpeed, enemyMaxSpeed);</div>
+
+          <strong>API pública</strong>
+          <ul>
+            <li><code>getPlayer()</code> → copia defensiva del <code>Rectangle</code> del jugador</li>
+            <li><code>getEnemy()</code> → copia defensiva del <code>Rectangle</code> del enemigo</li>
+            <li><code>getScore()</code> → puntuación actual como <code>int</code></li>
+            <li><code>isRunning()</code> → <code>true</code> mientras el juego esté activo</li>
+            <li><code>setEnemyPosition(x, y)</code> → usado exclusivamente en tests de integración</li>
+          </ul>
         </div>
       </details>
+
       <details>
-        <summary>Comando de ejecucion</summary>
+        <summary>GameLogic.java — Funciones puras sin estado <span class="tag">Lógica pura</span></summary>
         <div class="content">
-          Ejecuta pruebas con Maven:
-          <div class="code">mvn test</div>
-          Ejecuta el juego:
-          <div class="code">mvn exec:java</div>
+          <p>Clase <code>final</code> con constructor privado. No tiene ningún campo de instancia. Todas las funciones son <code>static</code>, deterministas y sin efectos secundarios (salvo <code>clampPlayerToBounds</code>, que muta el <code>Rectangle</code> recibido por diseño explícito).</p>
+
+          <strong>clampPlayerToBounds(Rectangle player, int width, int height)</strong>
+          <p>Limita las coordenadas del jugador para que el rectángulo completo permanezca dentro del área de juego. Modifica el <code>Rectangle</code> directamente (no crea uno nuevo).</p>
+          <div class="code">if (player.x &lt; 0)                        player.x = 0;
+if (player.y &lt; 0)                        player.y = 0;
+if (player.x + player.width  &gt; width)    player.x = width  - player.width;
+if (player.y + player.height &gt; height)   player.y = height - player.height;</div>
+
+          <strong>updateVerticalEnemySpeed(int enemyY, int enemyH, int panelH, int currentSpeed)</strong>
+          <p>Devuelve <code>-currentSpeed</code> cuando el enemigo toca el borde superior (<code>enemyY ≤ 0</code>) o el inferior (<code>enemyY + enemyH ≥ panelH</code>); en cualquier otro caso devuelve <code>currentSpeed</code> sin cambios. Función pura: no muta ningún parámetro.</p>
+          <div class="code">if (enemyY &lt;= 0 || enemyY + enemyHeight &gt;= panelHeight)
+    return -currentSpeed;
+return currentSpeed;</div>
+
+          <strong>randomSignedSpeed(Random random, int min, int max)</strong>
+          <p>Genera un entero en [min, max] y le asigna signo positivo o negativo de forma aleatoria. Produce movimiento vertical inicial hacia arriba o hacia abajo con la misma probabilidad.</p>
+          <div class="code">int baseSpeed = min + random.nextInt(max - min + 1);  // valor absoluto en [min,max]
+return random.nextBoolean() ? baseSpeed : -baseSpeed;  // signo aleatorio</div>
+
+          <strong>hasCollision(Rectangle player, Rectangle enemy)</strong>
+          <p>Delega directamente en <code>Rectangle.intersects()</code> de Java AWT. Dos rectángulos colisionan si se solapan en ambos ejes; tocarse en un solo borde no cuenta como colisión.</p>
+          <div class="code">return player.intersects(enemy);  // true si los rectángulos se solapan en X e Y</div>
+        </div>
+      </details>
+    </section>
+
+    <!-- ─── TAB: FLUJO DE EJECUCIÓN ───────────────────────────── -->
+    <section id="flujo" class="panel">
+      <h2>Flujo completo de ejecución</h2>
+
+      <ol class="step-list">
+        <li>
+          <div class="step-body">
+            <strong>JVM arranca — App.main()</strong>
+            <p><code>SwingUtilities.invokeLater</code> encola la construcción de la UI en el EDT de Swing. Esto garantiza thread-safety para todos los componentes gráficos.</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-body">
+            <strong>Construcción de GamePanel</strong>
+            <p>Se crea un <code>GameEngine</code> con las constantes del panel, se arranca el <code>Timer(16 ms)</code> y se registra el <code>KeyAdapter</code>. <code>JFrame.pack()</code> ajusta la ventana al <code>preferredSize</code> de 800×500.</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-body">
+            <strong>Bucle de juego — Timer cada 16 ms</strong>
+            <p>Cada disparo del Timer llama a <code>updateGame()</code> y luego a <code>repaint()</code>, produciendo aproximadamente 62 fotogramas por segundo.</p>
+            <div class="code">new Timer(16, event -> {
+    updateGame();   // 1. avanza estado
+    repaint();      // 2. solicita redibujado
+})</div>
+          </div>
+        </li>
+        <li>
+          <div class="step-body">
+            <strong>engine.tick() — un frame de simulación</strong>
+            <p>Aplica la entrada del teclado, limita al jugador, mueve al enemigo (rebote vertical + avance horizontal), verifica salida por la izquierda (punto) y detecta colisión (game over).</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-body">
+            <strong>paintComponent(g) — renderizado de la escena</strong>
+            <p>Lee las posiciones con los getters defensivos de <code>GameEngine</code> y dibuja cada capa (fondo → rejilla → jugador → enemigo → HUD → overlay).</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-body">
+            <strong>Game Over detectado</strong>
+            <p><code>GameLogic.hasCollision</code> devuelve <code>true</code> → <code>running = false</code>. El Timer sigue corriendo pero <code>tick()</code> retorna inmediatamente; solo se redibujan el overlay y el marcador.</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-body">
+            <strong>Reinicio con tecla R</strong>
+            <p>El <code>KeyAdapter</code> detecta <kbd>R</kbd>, comprueba que <code>!engine.isRunning()</code> y llama a <code>engine.resetGame()</code>. El siguiente tick reanuda el juego con el estado inicial.</p>
+          </div>
+        </li>
+      </ol>
+
+      <details>
+        <summary>Entrada de teclado con flags booleanos <span class="tag">KeyAdapter</span></summary>
+        <div class="content">
+          <p>Se mantienen cuatro flags que se activan en <code>keyPressed</code> y se desactivan en <code>keyReleased</code>. El motor los lee en cada tick, permitiendo movimiento continuo y diagonal mientras las teclas estén pulsadas.</p>
+          <div class="code">// En keyPressed:
+case KeyEvent.VK_LEFT:
+case KeyEvent.VK_A:      leftPressed  = true; break;
+case KeyEvent.VK_RIGHT:
+case KeyEvent.VK_D:      rightPressed = true; break;
+case KeyEvent.VK_UP:
+case KeyEvent.VK_W:      upPressed    = true; break;
+case KeyEvent.VK_DOWN:
+case KeyEvent.VK_S:      downPressed  = true; break;
+case KeyEvent.VK_R:
+    if (!engine.isRunning()) engine.resetGame();
+    break;
+// En keyReleased: los mismos casos con = false</div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Movimiento del enemigo: rebote vertical + avance horizontal <span class="tag">tick</span></summary>
+        <div class="content">
+          <p>El enemigo combina dos movimientos independientes por frame:</p>
+          <ul>
+            <li><strong>Vertical (rebote):</strong> <code>enemy.y += enemySpeed</code> cada tick. Al tocar el borde superior o inferior, <code>GameLogic.updateVerticalEnemySpeed</code> invierte el signo.</li>
+            <li><strong>Horizontal (avance):</strong> <code>enemy.x -= 4</code> siempre. Cuando <code>enemy.x + enemy.width &lt; 0</code>, el score sube 1 y el enemigo reaparece a la derecha con posición y velocidad aleatorias.</li>
+          </ul>
+          <div class="code">// Vertical (rebote en bordes)
+enemy.y    += enemySpeed;
+enemySpeed = GameLogic.updateVerticalEnemySpeed(
+                 enemy.y, enemy.height, height, enemySpeed);
+
+// Horizontal (avance constante hacia la izquierda)
+enemy.x -= enemyHorizontalSpeed;  // 4 px/frame
+if (enemy.x + enemy.width &lt; 0) {
+    score++;
+    resetEnemyPosition();  // x > 800, y y velocidad aleatorios
+}</div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Pipeline de renderizado — capas en orden <span class="tag">paintComponent</span></summary>
+        <div class="content">
+          <p>Swing llama a <code>paintComponent</code> cuando hay un repaint pendiente. Se dibuja de atrás hacia adelante (painter's algorithm):</p>
+          <ol>
+            <li><code>super.paintComponent(g)</code> — rellena el fondo con <code>#12182A</code></li>
+            <li>Rejilla: <code>g.drawLine</code> cada 40 px en azul oscuro (<code>new Color(40, 60, 94)</code>)</li>
+            <li>Jugador verde: <code>fillRect(player.x, player.y, …)</code> con <code>new Color(80, 220, 130)</code></li>
+            <li>Enemigo rojo: <code>fillRect(enemy.x, enemy.y, …)</code> con <code>new Color(255, 95, 86)</code></li>
+            <li>HUD de puntuación: <code>drawString("Puntos: " + score, 20, 35)</code></li>
+            <li>Instrucciones en el margen inferior</li>
+            <li>Overlay de Game Over solo si <code>!engine.isRunning()</code></li>
+          </ol>
+        </div>
+      </details>
+    </section>
+
+    <!-- ─── TAB: SIMULADOR ────────────────────────────────────── -->
+    <section id="simulador" class="panel">
+      <h2>Simulador visual de frames</h2>
+      <p style="color:var(--muted);margin-bottom:16px;">Reproduce la lógica real de <code>GameEngine.tick()</code> en JavaScript sobre un canvas escalado. Usa los botones o activa el modo automático (≈ 60 FPS). También puedes usar <kbd>WASD</kbd> / flechas mientras el simulador está activo.</p>
+
+      <div class="sim-wrap">
+        <div>
+          <div class="sim-canvas-wrap">
+            <canvas id="gameCanvas" width="800" height="500"></canvas>
+          </div>
+          <div class="kv">
+            <div><strong>player.x</strong><span id="sx"></span></div>
+            <div><strong>player.y</strong><span id="sy"></span></div>
+            <div><strong>enemy.x</strong><span id="ex"></span></div>
+            <div><strong>enemy.y</strong><span id="ey"></span></div>
+            <div><strong>enemySpeed</strong><span id="ev"></span></div>
+            <div><strong>score</strong><span id="sc"></span></div>
+            <div><strong>running</strong><span id="rn"></span></div>
+            <div><strong>frames</strong><span id="fc"></span></div>
+          </div>
+        </div>
+        <div class="sim-controls">
+          <div class="sim-section-title">Automático</div>
+          <button class="action" id="btnAuto">▶ Iniciar</button>
+          <div class="sim-section-title" style="margin-top:8px;">Manual</div>
+          <button class="action" id="btnFrame">⏭ Ejecutar 1 frame</button>
+          <div class="sim-section-title" style="margin-top:8px;">Teclas (toggle)</div>
+          <button class="action" id="btnLeft">← Izquierda</button>
+          <button class="action" id="btnRight">→ Derecha</button>
+          <button class="action" id="btnUp">↑ Arriba</button>
+          <button class="action" id="btnDown">↓ Abajo</button>
+          <div class="sim-section-title" style="margin-top:8px;">Control</div>
+          <button class="action" id="btnReset">⟳ Reset</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── TAB: TESTS ─────────────────────────────────────────── -->
+    <section id="tests" class="panel">
+      <h2>Tests — cobertura completa</h2>
+
+      <details open>
+        <summary>AppTest — Tests unitarios sobre GameLogic y constructor <span class="tag">6 tests</span></summary>
+        <div class="content">
+          <p>Cada test verifica una función pura de <code>GameLogic</code> o la validación de argumentos del constructor de <code>GameEngine</code>. No requieren entorno gráfico.</p>
+
+          <div class="test-case">
+            <div class="test-name">clampPlayerToBounds_keepsPlayerInsideBoard</div>
+            <p>Jugador en posición fuera del área (x=−10, y=900). Tras el clamp en un panel 800×500 con tamaño 36, debe quedar en (0, 464) ya que 500−36=464.</p>
+            <div class="code">Rectangle player = new Rectangle(-10, 900, 36, 36);
+GameLogic.clampPlayerToBounds(player, 800, 500);
+assertEquals(0,   player.x);
+assertEquals(464, player.y);</div>
+          </div>
+
+          <div class="test-case">
+            <div class="test-name">updateVerticalEnemySpeed_invertsOnTopAndBottomBorders</div>
+            <p>Verifica los tres casos posibles: borde superior (y=0 → invierte de 5 a −5), borde inferior (y=468, h=32, panel=500 → invierte de −4 a 4) y posición media (sin cambio).</p>
+            <div class="code">assertEquals(-5, GameLogic.updateVerticalEnemySpeed(0,   32, 500,  5));
+assertEquals( 4, GameLogic.updateVerticalEnemySpeed(468, 32, 500, -4));
+assertEquals( 3, GameLogic.updateVerticalEnemySpeed(120, 32, 500,  3));</div>
+          </div>
+
+          <div class="test-case">
+            <div class="test-name">hasCollision_returnsTrueOnlyWhenRectanglesOverlap</div>
+            <p>Un enemigo que se solapa con el jugador (120,120) → <code>true</code>. Uno que está lejos (400,300) → <code>false</code>.</p>
+            <div class="code">Rectangle player = new Rectangle(100, 100, 36, 36);
+assertTrue( GameLogic.hasCollision(player, new Rectangle(120, 120, 32, 32)));
+assertFalse(GameLogic.hasCollision(player, new Rectangle(400, 300, 32, 32)));</div>
+          </div>
+
+          <div class="test-case">
+            <div class="test-name">randomSignedSpeed_staysInExpectedAbsoluteRange</div>
+            <p>Ejecuta 200 iteraciones con semilla fija (42). El valor absoluto de la velocidad siempre debe estar en el rango [3, 7], tanto positiva como negativa.</p>
+            <div class="code">Random random = new Random(42);
+for (int i = 0; i &lt; 200; i++) {
+    int speed = GameLogic.randomSignedSpeed(random, 3, 7);
+    assertTrue(Math.abs(speed) &gt;= 3 &amp;&amp; Math.abs(speed) &lt;= 7);
+}</div>
+          </div>
+
+          <div class="test-case">
+            <div class="test-name">gameEngine_constructorRejectsInvalidSpeedRange</div>
+            <p>Pasar <code>enemyMinSpeed=8</code> con <code>enemyMaxSpeed=7</code> (min &gt; max) debe lanzar <code>IllegalArgumentException</code>.</p>
+            <div class="code">assertThrows(IllegalArgumentException.class,
+    () -> new GameEngine(800, 500, 36, 32, 6, 8, 7, 4, new Random(1)));</div>
+          </div>
+
+          <div class="test-case">
+            <div class="test-name">gameEngine_constructorRejectsNullRandom</div>
+            <p>Pasar <code>null</code> como instancia de <code>Random</code> debe lanzar <code>NullPointerException</code> de forma explícita (validación con <code>Objects.requireNonNull</code>).</p>
+            <div class="code">assertThrows(NullPointerException.class,
+    () -> new GameEngine(800, 500, 36, 32, 6, 3, 7, 4, null));</div>
+          </div>
+        </div>
+      </details>
+
+      <details>
+        <summary>GameEngineIntegrationTest — Ciclo completo del motor <span class="tag">4 tests</span></summary>
+        <div class="content">
+          <p>Usan un <code>GameEngine</code> con semilla fija <code>new Random(123)</code> para resultados reproducibles. Verifican comportamientos de varios ticks encadenados.</p>
+
+          <div class="test-case">
+            <div class="test-name">tick_movesEnemyLeftOnEachFrame</div>
+            <p>Con todas las teclas en <code>false</code>, el enemigo debe desplazarse exactamente 4 px a la izquierda por cada tick (<code>ENEMY_HORIZONTAL_SPEED = 4</code>).</p>
+            <div class="code">int initialEnemyX = engine.getEnemy().x;
+engine.tick(false, false, false, false);
+assertEquals(initialEnemyX - 4, engine.getEnemy().x);</div>
+          </div>
+
+          <div class="test-case">
+            <div class="test-name">tick_whenEnemyLeavesScreen_addsPointAndRespawns</div>
+            <p>Se fuerza el enemigo en x = −enemyWidth. El siguiente tick debe sumar 1 punto y reubicar al enemigo a x ≥ 800, con el juego aún en marcha.</p>
+            <div class="code">engine.setEnemyPosition(-enemy.width, 120);
+engine.tick(false, false, false, false);
+assertEquals(1, engine.getScore());
+assertTrue(engine.getEnemy().x &gt;= 800);
+assertTrue(engine.isRunning());</div>
+          </div>
+
+          <div class="test-case">
+            <div class="test-name">tick_whenCollisionHappens_stopsGameAndNextTicksDoNotAdvance</div>
+            <p>Se coloca el enemigo sobre el jugador para forzar colisión. Tras un tick el juego se detiene. Ticks adicionales (incluso con tecla izquierda) no modifican posición ni score.</p>
+            <div class="code">engine.setEnemyPosition(player.x, player.y);   // colisión directa
+engine.tick(false, false, false, false);
+assertFalse(engine.isRunning());
+
+int frozenX     = player.x;
+int frozenScore = engine.getScore();
+
+engine.tick(true, false, false, false);        // intento de movimiento
+assertEquals(frozenX,     player.x);          // x no cambia
+assertEquals(frozenScore, engine.getScore()); // score no cambia</div>
+          </div>
+
+          <div class="test-case">
+            <div class="test-name">getPlayer_returnsDefensiveCopy</div>
+            <p>Modificar el <code>Rectangle</code> devuelto por <code>getPlayer()</code> no debe alterar la posición interna del motor, que debe seguir siendo x=80.</p>
+            <div class="code">Rectangle snapshot = engine.getPlayer();
+snapshot.x = 999;                        // modifica la copia
+assertEquals(80, engine.getPlayer().x);  // estado interno intacto</div>
+          </div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Ejecutar los tests con Maven <span class="tag">CLI</span></summary>
+        <div class="content">
+          <div class="code">mvn test                                    # ejecuta todos los tests
+mvn test -Dtest=AppTest                     # solo tests unitarios
+mvn test -Dtest=GameEngineIntegrationTest   # solo integración
+mvn surefire-report:report                  # informe HTML en target/site/</div>
+          <p style="margin-top:8px;"><strong>Nota:</strong> los tests no necesitan entorno gráfico porque <code>GameEngine</code> y <code>GameLogic</code> son clases Java puras sin dependencia de Swing.</p>
+        </div>
+      </details>
+    </section>
+
+    <!-- ─── TAB: GUÍA PRÁCTICA ────────────────────────────────── -->
+    <section id="guia" class="panel">
+      <h2>Guía práctica de desarrollo</h2>
+
+      <h3 style="margin-bottom:12px;">Controles del juego</h3>
+      <div class="controls-grid">
+        <div class="ctrl-card"><span class="kbd">← / A</span><span class="ctrl-desc">Mover jugador a la izquierda</span></div>
+        <div class="ctrl-card"><span class="kbd">→ / D</span><span class="ctrl-desc">Mover jugador a la derecha</span></div>
+        <div class="ctrl-card"><span class="kbd">↑ / W</span><span class="ctrl-desc">Mover jugador hacia arriba</span></div>
+        <div class="ctrl-card"><span class="kbd">↓ / S</span><span class="ctrl-desc">Mover jugador hacia abajo</span></div>
+        <div class="ctrl-card"><span class="kbd">R</span><span class="ctrl-desc">Reiniciar partida (solo tras Game Over)</span></div>
+      </div>
+      <p style="color:var(--muted);font-size:0.87rem;margin-top:8px;">Se admiten dos teclas simultáneas para movimiento diagonal (ej. W+D → arriba-derecha).</p>
+
+      <details open style="margin-top:16px;">
+        <summary>Compilar, ejecutar y empaquetar <span class="tag">Maven</span></summary>
+        <div class="content">
+          <div class="code">mvn compile                   # compila las clases
+mvn exec:java                 # ejecuta el juego directamente
+mvn test                      # ejecuta todos los tests
+mvn clean                     # elimina la carpeta target/
+mvn package                   # genera el JAR en target/
+.\scripts\package-win.ps1     # empaqueta para distribución en Windows</div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Estructura de directorios del proyecto <span class="tag">Organización</span></summary>
+        <div class="content">
+          <div class="code">test-1-junio2026/
+├── pom.xml                                # build Maven + dependencias JUnit 5
+├── checkstyle.xml                         # reglas de estilo (Google style)
+├── src/
+│   ├── main/java/com/example/
+│   │   ├── App.java                       # UI, JFrame, Timer, KeyAdapter
+│   │   ├── GameEngine.java                # estado mutable + lógica de tick
+│   │   └── GameLogic.java                 # funciones puras sin estado
+│   └── test/java/com/example/
+│       ├── AppTest.java                   # 6 tests unitarios
+│       └── GameEngineIntegrationTest.java # 4 tests de integración
+├── docs/
+│   └── cicd.md                            # guía de pipeline CI/CD
+└── scripts/
+    └── package-win.ps1                    # script de empaquetado Windows</div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Cómo ampliar el juego sin romper los tests existentes <span class="tag">Extensión</span></summary>
+        <div class="content">
+          <ul>
+            <li><strong>Más enemigos:</strong> añade una <code>List&lt;Rectangle&gt;</code> en <code>GameEngine</code> e itera llamando a <code>GameLogic.hasCollision</code> para cada uno.</li>
+            <li><strong>Dificultad progresiva:</strong> incrementa <code>enemyHorizontalSpeed</code> o el rango de velocidades verticales cada N puntos conseguidos.</li>
+            <li><strong>Disparos del jugador:</strong> añade una clase <code>Bullet</code>, gestiónala en <code>GameEngine</code> y detecta colisión con el enemigo usando <code>GameLogic.hasCollision</code>.</li>
+            <li><strong>Puntuación máxima:</strong> persiste el highscore en un fichero <code>.properties</code> y muéstralo en el HUD junto al score actual.</li>
+            <li><strong>Sonido mejorado:</strong> sustituye el <code>Toolkit.beep()</code> por <code>javax.sound.sampled.AudioClip</code> con un fichero WAV.</li>
+            <li><strong>Menú principal:</strong> añade un panel de menú y gestiona transiciones con <code>CardLayout</code> en el <code>JFrame</code>.</li>
+          </ul>
+        </div>
+      </details>
+
+      <details>
+        <summary>Dependencias del pom.xml <span class="tag">Build</span></summary>
+        <div class="content">
+          <ul>
+            <li><strong>JUnit 5 (Jupiter)</strong> — motor de tests unitarios y de integración.</li>
+            <li><strong>Maven Surefire Plugin</strong> — descubre y ejecuta los tests; genera informes XML en <code>target/surefire-reports/</code>.</li>
+            <li><strong>Maven Exec Plugin</strong> — permite lanzar la aplicación con <code>mvn exec:java</code> sin construir un JAR.</li>
+            <li><strong>Maven Checkstyle Plugin</strong> — valida el estilo del código según <code>checkstyle.xml</code> durante el build.</li>
+          </ul>
         </div>
       </details>
     </section>
 
     <footer>
-      Sugerencia: manten App como UI, GameEngine como estado y GameLogic como reglas puras para escalar el juego sin romper tests.
+      <strong>Recomendación de arquitectura:</strong> mantén <code>App</code> como capa de presentación, <code>GameEngine</code> como único contenedor de estado mutable y <code>GameLogic</code> como librería de funciones puras. Esta separación permite testear la lógica sin levantar ventanas Swing y escalar el juego sin romper los tests existentes.
+      <br>
+      <strong>Proyecto:</strong> Mini Juego 2D — Esquiva Cuadrados &nbsp;·&nbsp; Java + Swing + JUnit 5 &nbsp;·&nbsp; 2026
     </footer>
   </div>
 
   <script>
+    // ── TAB SWITCHING ──────────────────────────────────────────────────
     const buttons = Array.from(document.querySelectorAll('.tab-btn'));
-    const panels = Array.from(document.querySelectorAll('.panel'));
+    const panels  = Array.from(document.querySelectorAll('.panel'));
 
     buttons.forEach((btn) => {
       btn.addEventListener('click', () => {
         buttons.forEach((b) => b.classList.remove('active'));
-        panels.forEach((p) => p.classList.remove('active'));
+        panels.forEach((p)  => p.classList.remove('active'));
         btn.classList.add('active');
         const panel = document.getElementById(btn.dataset.tab);
         if (panel) panel.classList.add('active');
+        if (btn.dataset.tab === 'simulador') renderCanvas();
       });
     });
 
+    // ── SIMULATOR STATE ────────────────────────────────────────────────
+    const W = 800, H = 500, PW = 36, EW = 32, EH = 32, PSPD = 6, EHS = 4;
+
     const state = {
-      width: 800,
-      height: 500,
-      playerW: 36,
-      enemyW: 32,
-      enemyH: 32,
-      playerX: 80,
-      enemyX: 680,
-      enemyY: 80,
+      playerX: 80, playerY: H / 2 - PW / 2,
+      enemyX: W - 120, enemyY: 80,
       enemySpeed: 4,
-      score: 0,
+      score: 0, frames: 0,
       running: true,
-      leftPressed: false,
-      rightPressed: false
+      leftPressed: false, rightPressed: false,
+      upPressed: false,   downPressed: false
     };
 
-    function clamp(v, min, max) {
-      return Math.max(min, Math.min(max, v));
-    }
-
-    function renderState() {
-      document.getElementById('sx').textContent = String(state.playerX);
-      document.getElementById('ex').textContent = String(state.enemyX);
-      document.getElementById('ey').textContent = String(state.enemyY);
-      document.getElementById('ev').textContent = String(state.enemySpeed);
-      document.getElementById('sc').textContent = String(state.score);
-      document.getElementById('rn').textContent = state.running ? 'true' : 'false';
-      document.getElementById('lp').textContent = state.leftPressed ? 'ON' : 'OFF';
-      document.getElementById('rp').textContent = state.rightPressed ? 'ON' : 'OFF';
-    }
+    function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 
     function tick() {
       if (!state.running) return;
+      state.frames++;
 
-      if (state.leftPressed) state.playerX -= 6;
-      if (state.rightPressed) state.playerX += 6;
-      state.playerX = clamp(state.playerX, 0, state.width - state.playerW);
+      if (state.leftPressed)  state.playerX -= PSPD;
+      if (state.rightPressed) state.playerX += PSPD;
+      if (state.upPressed)    state.playerY -= PSPD;
+      if (state.downPressed)  state.playerY += PSPD;
+
+      state.playerX = clamp(state.playerX, 0, W - PW);
+      state.playerY = clamp(state.playerY, 0, H - PW);
 
       state.enemyY += state.enemySpeed;
-      if (state.enemyY <= 0 || state.enemyY + state.enemyH >= state.height) {
-        state.enemySpeed *= -1;
+      if (state.enemyY <= 0 || state.enemyY + EH >= H) {
+        state.enemySpeed = -state.enemySpeed;
+        state.enemyY = clamp(state.enemyY, 0, H - EH);
       }
 
-      state.enemyX -= 4;
-      if (state.enemyX + state.enemyW < 0) {
-        state.score += 1;
-        state.enemyX = state.width + 40;
-        state.enemyY = 120;
+      state.enemyX -= EHS;
+      if (state.enemyX + EW < 0) {
+        state.score++;
+        state.enemyX = W + 40 + Math.floor(Math.random() * 220);
+        state.enemyY = Math.floor(Math.random() * (H - EH));
+        state.enemySpeed = (Math.random() > 0.5 ? 1 : -1) * (3 + Math.floor(Math.random() * 5));
       }
 
-      const overlapX = state.playerX < state.enemyX + state.enemyW && state.playerX + state.playerW > state.enemyX;
-      const overlapY = 232 < state.enemyY + state.enemyH && 232 + state.playerW > state.enemyY;
-      if (overlapX && overlapY) {
-        state.running = false;
+      const overlapX = state.playerX < state.enemyX + EW && state.playerX + PW > state.enemyX;
+      const overlapY = state.playerY < state.enemyY + EH && state.playerY + PW > state.enemyY;
+      if (overlapX && overlapY) state.running = false;
+    }
+
+    // ── CANVAS RENDERER ────────────────────────────────────────────────
+    const canvas = document.getElementById('gameCanvas');
+    const ctx    = canvas.getContext('2d');
+
+    function renderCanvas() {
+      ctx.fillStyle = '#12182A';
+      ctx.fillRect(0, 0, W, H);
+
+      ctx.strokeStyle = '#28405E';
+      ctx.lineWidth = 1;
+      for (let x = 0; x <= W; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+      for (let y = 0; y <= H; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+
+      ctx.fillStyle = '#50DC82';
+      ctx.fillRect(state.playerX, state.playerY, PW, PW);
+
+      ctx.fillStyle = '#FF5F56';
+      ctx.fillRect(state.enemyX, state.enemyY, EW, EH);
+
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = 'bold 22px SansSerif';
+      ctx.fillText('Puntos: ' + state.score, 20, 35);
+
+      ctx.font = '16px SansSerif';
+      ctx.fillStyle = '#9ca3af';
+      ctx.fillText('Mover: WASD o flechas', 20, H - 18);
+
+      if (!state.running) {
+        ctx.fillStyle = 'rgba(0,0,0,0.55)';
+        ctx.fillRect(0, 0, W, H);
+        ctx.fillStyle = '#FFE15F';
+        ctx.font = 'bold 52px SansSerif';
+        const goW = ctx.measureText('GAME OVER').width;
+        ctx.fillText('GAME OVER', (W - goW) / 2, H / 2 - 12);
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = '22px SansSerif';
+        const rstW = ctx.measureText('Pulsa R para reiniciar').width;
+        ctx.fillText('Pulsa R para reiniciar', (W - rstW) / 2, H / 2 + 34);
       }
     }
 
+    function updateDisplay() {
+      document.getElementById('sx').textContent = state.playerX;
+      document.getElementById('sy').textContent = state.playerY;
+      document.getElementById('ex').textContent = state.enemyX;
+      document.getElementById('ey').textContent = state.enemyY;
+      document.getElementById('ev').textContent = state.enemySpeed;
+      document.getElementById('sc').textContent = state.score;
+      document.getElementById('rn').textContent = state.running ? 'true ✓' : 'false ✗';
+      document.getElementById('fc').textContent = state.frames;
+    }
+
+    // ── AUTO PLAY ──────────────────────────────────────────────────────
+    let autoInterval = null;
+    const btnAuto = document.getElementById('btnAuto');
+
+    btnAuto.addEventListener('click', () => {
+      if (autoInterval) {
+        clearInterval(autoInterval);
+        autoInterval = null;
+        btnAuto.textContent = '▶ Iniciar';
+        btnAuto.classList.remove('pressed');
+      } else {
+        autoInterval = setInterval(() => { tick(); renderCanvas(); updateDisplay(); }, 16);
+        btnAuto.textContent = '⏸ Pausar';
+        btnAuto.classList.add('pressed');
+      }
+    });
+
     document.getElementById('btnFrame').addEventListener('click', () => {
-      tick();
-      renderState();
+      tick(); renderCanvas(); updateDisplay();
     });
 
-    document.getElementById('btnLeft').addEventListener('click', () => {
-      state.leftPressed = !state.leftPressed;
-      if (state.leftPressed) state.rightPressed = false;
-      renderState();
+    function makeToggle(id, key) {
+      const btn = document.getElementById(id);
+      btn.addEventListener('click', () => {
+        state[key] = !state[key];
+        btn.classList.toggle('pressed', state[key]);
+        renderCanvas(); updateDisplay();
+      });
+    }
+    makeToggle('btnLeft',  'leftPressed');
+    makeToggle('btnRight', 'rightPressed');
+    makeToggle('btnUp',    'upPressed');
+    makeToggle('btnDown',  'downPressed');
+
+    function doReset() {
+      Object.assign(state, {
+        playerX: 80, playerY: H / 2 - PW / 2,
+        enemyX: W - 120, enemyY: 80,
+        enemySpeed: 4, score: 0, frames: 0,
+        running: true,
+        leftPressed: false, rightPressed: false,
+        upPressed: false,   downPressed: false
+      });
+      document.querySelectorAll('button.action.pressed').forEach(b => b.classList.remove('pressed'));
+      btnAuto.textContent = '▶ Iniciar';
+      if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+      renderCanvas(); updateDisplay();
+    }
+    document.getElementById('btnReset').addEventListener('click', doReset);
+
+    // ── KEYBOARD SUPPORT IN SIMULATOR TAB ─────────────────────────────
+    const keyMap = {
+      ArrowLeft: 'leftPressed',  KeyA: 'leftPressed',
+      ArrowRight: 'rightPressed', KeyD: 'rightPressed',
+      ArrowUp: 'upPressed',      KeyW: 'upPressed',
+      ArrowDown: 'downPressed',  KeyS: 'downPressed'
+    };
+    document.addEventListener('keydown', (e) => {
+      const active = document.querySelector('.panel.active');
+      if (!active || active.id !== 'simulador') return;
+      if (keyMap[e.code]) { state[keyMap[e.code]] = true; e.preventDefault(); }
+      if (e.code === 'KeyR' && !state.running) doReset();
+    });
+    document.addEventListener('keyup', (e) => {
+      const active = document.querySelector('.panel.active');
+      if (!active || active.id !== 'simulador') return;
+      if (keyMap[e.code]) state[keyMap[e.code]] = false;
     });
 
-    document.getElementById('btnRight').addEventListener('click', () => {
-      state.rightPressed = !state.rightPressed;
-      if (state.rightPressed) state.leftPressed = false;
-      renderState();
-    });
-
-    document.getElementById('btnReset').addEventListener('click', () => {
-      state.playerX = 80;
-      state.enemyX = 680;
-      state.enemyY = 80;
-      state.enemySpeed = 4;
-      state.score = 0;
-      state.running = true;
-      state.leftPressed = false;
-      state.rightPressed = false;
-      renderState();
-    });
-
-    renderState();
+    renderCanvas();
+    updateDisplay();
   </script>
 </body>
 </html>
