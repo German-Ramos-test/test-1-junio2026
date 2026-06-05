@@ -4,7 +4,7 @@ POC de videojuego 2D en Java Swing con enfoque de calidad: separacion por capas,
 
 ## Requisitos
 
-- Java 17
+- Java 21
 - Maven 3.9+
 - (Opcional para empaquetado) `jpackage` disponible en el JDK
 

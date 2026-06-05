@@ -10,8 +10,8 @@
     <description>POC de videojuego 2D en Java Swing con pruebas y quality gates</description>
 
     <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <junit.jupiter.version>5.11.0</junit.jupiter.version>
         <jacoco.version>0.8.12</jacoco.version>
